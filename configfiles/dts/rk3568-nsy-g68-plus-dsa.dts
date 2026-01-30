@@ -14,8 +14,8 @@
 #include "rk3568-ramoops.dtsi"
 
 / {
-	model = "BDY-G18 AX3000 Router";
-	compatible = "bdy,g18-pro", "rockchip,rk3568";
+	model = "NSY-G68 AX3000 Router";
+	compatible = "nsy,g68-plus", "rockchip,rk3568";
 
 	aliases {
 		ethernet0 = &gmac0;
@@ -341,22 +341,6 @@
 			pinctrl-0 = <&led_power_en>;
 		};
 	};
-
-	rtlgsw@0 {
-		compatible = "realtek,rtl8367s";
-		realtek,mdio = <&mdio0>;
-		mii-bus = <&mdio0>;
-		realtek,id = <29>;
-		phy-id = <29>;
-		cpu_port = <7>;
-
-		//txdelay, rxdelay, mode, ability.force_mode, ability.txpause, ability.rxpause, ability.link, ability.duplex, speed
-		//sgmii,
-		realtek,extif1 = <0 0 11 1 1 1 1 1 2>;
-		//rgmii
-		realtek,extif2 = <0 0 1 1 1 1 1 1 2>;
-		status = "okay";
-	};
 };
 
 &i2c0 {
@@ -588,7 +572,7 @@
 			rockchip,pins = <0 RK_PC3 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 		pcie30x2_reset_h: pcie30x2-reset-h {
-			rockchip,pins = <4 RK_PC4 RK_FUNC_GPIO &pcfg_pull_none>;
+			rockchip,pins = <0 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 		pcie2x1_reset_h: pcie2x1-reset-h {
 			rockchip,pins = <3 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>;
@@ -651,14 +635,14 @@
 		reset-gpios = <&gpio0 RK_PC3 GPIO_ACTIVE_HIGH>;
 		num-lanes = <0x1>; /*可能不生效,但是拆分需要打补丁,如果是吧,打补丁*/
 		pinctrl-0 = <&pcie30x1_reset_h>;
-		status = "disabled";
+		status = "okay";
 };
 
 //fe280000
 &pcie3x2 {
 		vpcie3v3-supply = <&vcc3v3_pcie>;
-		reset-gpios = <&gpio4 RK_PC4 GPIO_ACTIVE_HIGH>;
-		num-lanes = <0x2>;
+		reset-gpios = <&gpio0 RK_PC6 GPIO_ACTIVE_HIGH>;
+		num-lanes = <0x1>;
 		pinctrl-0 = <&pcie30x2_reset_h>;
 		rockchip,perst-inactive-ms = <500>;
 		status = "okay";
@@ -682,13 +666,100 @@
 };
 
 &mdio0 {
-	status = "okay";
+	#address-cells = <1>;
+    #size-cells = <0>;
+
+    switch@29 {
+        compatible = "realtek,rtl8365mb";
+        reg = <29>;
+
+        reset-gpios = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
+        pinctrl-names = "default";
+        reset-assert-us = <20000>;
+        reset-deassert-us = <100000>;
+        pinctrl-0 = <&gmac0_reset>;
+
+        mdio {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            phy0: ethernet-phy@0 {
+                reg = <0>;
+            };
+
+            phy1: ethernet-phy@1 {
+                reg = <1>;
+            };
+
+            phy2: ethernet-phy@2 {
+                reg = <2>;
+            };
+
+            phy3: ethernet-phy@3 {
+                reg = <3>;
+            };
+
+            phy4: ethernet-phy@4 {
+                reg = <4>;
+            };
+        };
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+                label = "lan1";
+                hy-handle = <&phy0>;
+            };
+
+            port@1 {
+                reg = <1>;
+                label = "lan2";
+                phy-handle = <&phy1>;
+            };
+
+            port@2 {
+                reg = <2>;
+                label = "lan3";
+                phy-handle = <&phy2>;
+            };
+
+            port@3 {
+                reg = <3>;
+                label = "lan4";
+                phy-handle = <&phy3>;
+            };
+
+            port@4 {
+                reg = <4>;
+                label = "lan5";
+                phy-handle = <&phy4>;
+            };
+
+            port@7 {
+                reg = <7>;
+                ethernet = <&gmac0>;
+                phy-mode = "rgmii";
+                rx-internal-delay-ps = <2000>;
+                tx-internal-delay-ps = <2000>;
+
+                fixed-link {
+                    speed = <1000>;
+                    full-duplex;
+                };
+            };
+        };
+    };
 };
 
 &gmac0 {
+	/delete-property/ snps,tso;
 	status = "okay";
-	phy-mode = "rgmii";
-	snps,reset-gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
+	phy-mode = "rgmii-id";
+	// reset gpio 写到交换机配置里面
+	//snps,reset-gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	snps,reset-delays-us = <0 20000 100000>;
 	assigned-clocks = <&cru SCLK_GMAC0_RX_TX &cru SCLK_GMAC0>;
@@ -724,7 +795,7 @@
 
 &gmac1 {
 	status = "disabled";
-	phy-mode = "sgmii";
+	phy-mode = "rgmii";
 	rockchip,pipegrf = <&pipegrf>;
 	rockchip,xpcs = <&xpcs>;
 	//snps,reset-gpio = <&gpio2 RK_PC2 GPIO_ACTIVE_LOW>;
