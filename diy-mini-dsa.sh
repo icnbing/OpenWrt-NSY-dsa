@@ -129,11 +129,11 @@ chmod 755 package/base-files/files/bin/coremark.sh
 
 # 动态适配农商云g68,农商云g16,彼度云g18机型，不懂的别乱修改
 # 复制 02_network 网络配置文件到 target/linux/rockchip/armv8/base-files/etc/board.d/ 目录下
-cp -f $GITHUB_WORKSPACE/configfiles/02_network target/linux/rockchip/armv8/base-files/etc/board.d/02_network
+cp -f $GITHUB_WORKSPACE/configfiles/02_network-dsa target/linux/rockchip/armv8/base-files/etc/board.d/02_network
 
 
 # cp -f $GITHUB_WORKSPACE/configfiles/uboot-Makefile package/boot/uboot-rockchip/Makefile
-grep -q 'seewo_sv21 \\$' package/boot/uboot-rockchip/Makefile && sed -i "s/seewo_sv21 \\\\/seewo_sv21 \\\\\n    nsy_g68-plus \\\\\n    nsy_g16-plus \\\\\n    bdy_g18-pro \\\\/g" package/boot/uboot-rockchip/Makefile || sed -i "s/seewo_sv21/seewo_sv21 \\\\\n    nsy_g68-plus \\\\\n    nsy_g16-plus \\\\\n    bdy_g18-pro/g" package/boot/uboot-rockchip/Makefile
+grep -q 'seewo_sv21 \\$' package/boot/uboot-rockchip/Makefile && sed -i "s/seewo_sv21 \\\\/seewo_sv21 \\\\\n    nsy_g68-plus \\\\\n    nsy_g16-plus \\\\\n    bdy_g18-pro \\\\/g" package/boot/uboot-rockchip/Makefile || sed -i "s/seewo_sv21/seewo_sv21 \\\\\n    nsy_g68-plus/g" package/boot/uboot-rockchip/Makefile
 
 
 echo -e "\\ndefine Device/nsy_g68-plus
@@ -144,59 +144,29 @@ echo -e "\\ndefine Device/nsy_g68-plus
   SUPPORTED_DEVICES := nsy,g68-plus
   UBOOT_DEVICE_NAME := generic-rk3568
   IMAGE/sysupgrade.img.gz := boot-common | boot-script | pine64-img | gzip | append-metadata
-  DEVICE_PACKAGES := kmod-gpio-button-hotplug kmod-nvme kmod-scsi-core kmod-hwmon-pwmfan kmod-thermal kmod-switch-rtl8306 kmod-switch-rtl8366-smi kmod-switch-rtl8366rb kmod-switch-rtl8366s kmod-switch-rtl8367b swconfig kmod-swconfig kmod-r8168
+  DEVICE_PACKAGES := kmod-gpio-button-hotplug kmod-nvme kmod-scsi-core kmod-hwmon-pwmfan kmod-thermal dsa-realtek dsa-rtl8365mb kmod-r8168
 endef
 TARGET_DEVICES += nsy_g68-plus" >> target/linux/rockchip/image/armv8.mk
 
 
-echo -e "\\ndefine Device/nsy_g16-plus
-  DEVICE_VENDOR := NSY
-  DEVICE_MODEL := G16
-  SOC := rk3568
-  DEVICE_DTS := rk3568-nsy-g16-plus
-  SUPPORTED_DEVICES := nsy,g16-plus
-  UBOOT_DEVICE_NAME := generic-rk3568
-  IMAGE/sysupgrade.img.gz := boot-common | boot-script | pine64-img | gzip | append-metadata
-  DEVICE_PACKAGES := kmod-gpio-button-hotplug kmod-nvme kmod-scsi-core kmod-hwmon-pwmfan kmod-thermal kmod-switch-rtl8306 kmod-switch-rtl8366-smi kmod-switch-rtl8366rb kmod-switch-rtl8366s kmod-switch-rtl8367b swconfig kmod-swconfig kmod-r8168
-endef
-TARGET_DEVICES += nsy_g16-plus" >> target/linux/rockchip/image/armv8.mk
-
-
-echo -e "\\ndefine Device/bdy_g18-pro
-  DEVICE_VENDOR := BDY
-  DEVICE_MODEL := G18
-  SOC := rk3568
-  DEVICE_DTS := rk3568-bdy-g18-pro
-  SUPPORTED_DEVICES := bdy,g18-pro
-  UBOOT_DEVICE_NAME := generic-rk3568
-  IMAGE/sysupgrade.img.gz := boot-common | boot-script | pine64-img | gzip | append-metadata
-  DEVICE_PACKAGES := kmod-gpio-button-hotplug kmod-nvme kmod-scsi-core kmod-hwmon-pwmfan kmod-thermal kmod-switch-rtl8306 kmod-switch-rtl8366-smi kmod-switch-rtl8366rb kmod-switch-rtl8366s kmod-switch-rtl8367b swconfig kmod-swconfig kmod-r8168
-endef
-TARGET_DEVICES += bdy_g18-pro" >> target/linux/rockchip/image/armv8.mk
-
-
-# 加入初始化交换机脚本
-cp -f $GITHUB_WORKSPACE/configfiles/swconfig_install package/base-files/files/etc/init.d/swconfig_install
-chmod 755 package/base-files/files/etc/init.d/swconfig_install
+# 追加自定义内核配置项
+echo "CONFIG_NET_DSA=y
+CONFIG_NET_DSA_REALTEK=y
+CONFIG_PHYLIB=y
+CONFIG_MDIO_BUS=y
+CONFIG_MDIO_DEVICE=y
+CONFIG_NET_DSA_REALTEK=y
+CONFIG_NET_DSA_REALTEK_MDIO=y
+# CONFIG_NET_DSA_REALTEK_SMI is not set
+CONFIG_NET_DSA_REALTEK_RTL8365MB=y
+CONFIG_NET_DSA_REALTEK_RTL8366RB=n
+CONFIG_NET_DSA_TAG_RTL8_4=y" >> target/linux/rockchip/armv8/config-6.12
 
 
 cp -a $GITHUB_WORKSPACE/configfiles/dts/* target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/
 rm -rf target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/rk3568-nsy-g68-plus.dts
 mv target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/rk3568-nsy-g68-plus-dsa.dts target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/rk3568-nsy-g68-plus.dts
 ls target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/
-
-
-# rtl8367b驱动资源包，暂时使用这样替换
-wget https://github.com/xiaomeng9597/files/releases/download/files/rtl8367b-lede.tar.gz
-tar -xvf rtl8367b-lede.tar.gz
-
-
-# openwrt主线rtl8367b驱动资源包，暂时使用这样替换
-# wget https://github.com/xiaomeng9597/files/releases/download/files/rtl8367b-openwrt.tar.gz
-# tar -xvf rtl8367b-openwrt.tar.gz
-# 适配机型代码结束
-
-
 
 
 # 定时限速插件
