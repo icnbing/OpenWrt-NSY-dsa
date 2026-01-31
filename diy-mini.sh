@@ -181,6 +181,7 @@ chmod 755 package/base-files/files/etc/init.d/swconfig_install
 
 
 cp -a $GITHUB_WORKSPACE/configfiles/dts/* target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/
+ls target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/
 
 
 # 集成 nsy_g68-plus WiFi驱动
