@@ -796,7 +796,7 @@
 &gmac1 {
 	/delete-property/ snps,tso;
 	status = "okay";
-	phy-mode = "sgmii";
+	phy-mode = "rgmii";
 	rockchip,pipegrf = <&pipegrf>;
 	rockchip,xpcs = <&xpcs>;
 	//snps,reset-gpio = <&gpio2 RK_PC2 GPIO_ACTIVE_LOW>;
