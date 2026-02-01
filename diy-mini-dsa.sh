@@ -151,7 +151,6 @@ TARGET_DEVICES += nsy_g68-plus" >> target/linux/rockchip/image/armv8.mk
 
 # 追加自定义内核配置项
 echo "CONFIG_NET_DSA=y
-CONFIG_NET_DSA_REALTEK=y
 CONFIG_PHYLIB=y
 CONFIG_MDIO_BUS=y
 CONFIG_MDIO_DEVICE=y
