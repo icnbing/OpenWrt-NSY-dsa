@@ -758,6 +758,7 @@
 
             port@7 {
                 reg = <7>;
+                label = "cpu";
                 ethernet = <&gmac0>;
                 phy-mode = "rgmii-id";
                 rx-internal-delay-ps = <2000>;
