@@ -188,6 +188,7 @@ CONFIG_NET_DSA_REALTEK_RTL8366RB=y
 CONFIG_NET_DSA_TAG_RTL8_4=y" >> target/linux/rockchip/armv8/config-6.12
 
 
+cp -a $GITHUB_WORKSPACE/configfiles/dts/* target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/
 cp -a $GITHUB_WORKSPACE/configfiles/dts/dsa/* target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/
 ls target/linux/rockchip/files/arch/arm64/boot/dts/rockchip/
 
