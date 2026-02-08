@@ -16,7 +16,6 @@
 #include "rk3568.dtsi"
 #include "rk3568-vngpu.dtsi"
 #include "rk3568-vngpu-rk809.dtsi"
-#include "rk3568-ramoops.dtsi"
 
 / {
 	model = "ZLG M3568 EVB";
@@ -39,28 +38,17 @@
 		#size-cells = <2>;
 		ranges;
 
-		ramoops: ramoops@110000 {
-			compatible = "ramoops";
-			reg = <0 0x110000 0 0xf0000>;
-			console-size = <0x80000>;
-			ftrace-size = <0x00000>;
-			pmsg-size = <0x50000>;
-			record-size = <0x20000>;
-		};
-
 		linux,cma {
 			compatible = "shared-dma-pool";
 			reusable;
 			size = <0x0 0x20000000>; /* 512MB */
 			linux,cma-default;
-			alloc-ranges = <0x0 0x00000000 0x0 0xffffffff>;
 		};
 
 		mpp_reserved: mpp-reserved {
 			compatible = "shared-dma-pool";
 			reusable;
 			size = <0x0 0x10000000>; /* 256MB */
-			alloc-ranges = <0x0 0x00000000 0x0 0xffffffff>;
 		};
 	};
 
