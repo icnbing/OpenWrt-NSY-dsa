@@ -762,6 +762,7 @@
                 phy-mode = "rgmii-id";
                 rx-internal-delay-ps = <2000>;
                 tx-internal-delay-ps = <2000>;
+                dsa,mac-address-increment = <1>;
 
                 fixed-link {
                     speed = <1000>;
@@ -783,6 +784,7 @@
 	assigned-clocks = <&cru SCLK_GMAC0_RX_TX &cru SCLK_GMAC0>;
 	assigned-clock-parents = <&cru SCLK_GMAC0_RGMII_SPEED &cru CLK_MAC0_2TOP>;
 	assigned-clock-rates = <0 125000000>;
+	local-mac-address = [00 11 22 33 44 00];
 	clock_in_out = "output";
 	pinctrl-names = "default";
 	pinctrl-0 = <&gmac0_miim &gmac0_tx_bus2 &gmac0_rx_bus2 &gmac0_rgmii_clk &gmac0_rgmii_bus>;
